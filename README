@@ -1,0 +1,9 @@
+Repository containing script about aws tools
+
+# instances_table
+Using boto3 print a table of all instances in a similar way like browser one.
+Using it:
+```
+python instances_table "profile_name"
+``` 
+_profile_name_ must be set in ~/.aws/credentials, otherwise use default one
