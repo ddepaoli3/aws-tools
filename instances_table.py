@@ -6,6 +6,14 @@ import boto3
 from datetime import datetime
 from json import JSONDecoder
 from json import JSONEncoder
+import argparse
+
+def arguments_creation():
+    parser = argparse.ArgumentParser(
+         description='Make things happen.')
+    parser.add_argument('-p', '--profile', default="default", help='Profile to use', required=False)
+    args = parser.parse_args()
+    return args
 
 class DateTimeDecoder(json.JSONDecoder):
 
@@ -78,8 +86,7 @@ def main(profile="default"):
             get_value_from_key("KeyName", instance)
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        main(profile=sys.argv[1])
-    else:
-        main(profile="default")
+    arguments = arguments_creation()
+    main(arguments.profile)
+
 
