@@ -67,10 +67,10 @@ def get_name_from_tag(tag_list):
 
 def main(profile="default"):
     #js = json.loads(open("/tmp/prova.json", "r").read())
-    armani=boto3.session.Session(profile_name=profile)
-    ec2=armani.resource('ec2')
+    botosession=boto3.session.Session(profile_name=profile)
+    ec2=botosession.resource('ec2')
 
-    client=armani.client('ec2')
+    client=botosession.client('ec2')
     #js = json.loads(client.describe_instances(), object_hook=json_serial)
     js = json.loads(json.dumps(client.describe_instances(),cls=DateTimeEncoder), cls=DateTimeDecoder)
     for reservation in js["Reservations"]:
