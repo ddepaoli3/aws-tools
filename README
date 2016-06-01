@@ -10,3 +10,9 @@ _profile_name_ must be set in ~/.aws/credentials, otherwise use default one
 
 * weblike print table similar to ec2 web interface
 * securitygroup: prit instances and its security group
+
+# rds_list
+Print a list of rds databases in a given region
+```
+python rds_list.py -p "profile_name"
+```
