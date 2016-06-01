@@ -12,6 +12,7 @@ def arguments_creation():
     parser = argparse.ArgumentParser(
          description='Make things happen.')
     parser.add_argument('-p', '--profile', default="default", help='Profile to use', required=False)
+    parser.add_argument('-o', '--output', default="weblike", help='Profile to use as output', choices=['weblike','securitygroup'], required=False)
     args = parser.parse_args()
     return args
 
@@ -65,7 +66,7 @@ def get_name_from_tag(tag_list):
             return tag["Value"]
     return ""
 
-def main(profile="default"):
+def main_like_web_interface(profile="default"):
     #js = json.loads(open("/tmp/prova.json", "r").read())
     botosession=boto3.session.Session(profile_name=profile)
     ec2=botosession.resource('ec2')
@@ -78,15 +79,30 @@ def main(profile="default"):
             print get_name_from_tag(get_value_from_key("Tags", instance)) + "\t" + \
             get_value_from_key("InstanceId", instance) + "\t" + \
             get_value_from_key("InstanceType", instance) + "\t" + \
-            get_value_from_key("AvailabilityZone", instance["Placement"]) + "\t" + \
             get_value_from_key("Name", instance["State"]) + "\t" + \
-            get_value_from_key("PublicDnsName", instance) + "\t" + \
             get_value_from_key("PublicIpAddress", instance) + "\t" + \
             get_value_from_key("PrivateIpAddress", instance) + "\t" + \
             get_value_from_key("KeyName", instance)
 
+def main_security_group(profile="default"):
+        #js = json.loads(open("/tmp/prova.json", "r").read())
+    botosession=boto3.session.Session(profile_name=profile)
+    ec2=botosession.resource('ec2')
+
+    client=botosession.client('ec2')
+    #js = json.loads(client.describe_instances(), object_hook=json_serial)
+    js = json.loads(json.dumps(client.describe_instances(),cls=DateTimeEncoder), cls=DateTimeDecoder)
+    for reservation in js["Reservations"]:
+        for instance in reservation["Instances"]:
+            print get_name_from_tag(get_value_from_key("Tags", instance)) + "\t" + \
+            get_value_from_key("InstanceId", instance) + "\t" + \
+            str(get_value_from_key("SecurityGroups", instance))
+
 if __name__ == '__main__':
     arguments = arguments_creation()
-    main(arguments.profile)
+    if arguments.output == "securitygroup":
+        main_security_group(arguments.profile)
+    elif arguments.output == "weblike":
+        main_like_web_interface(arguments.profile)
 
 
