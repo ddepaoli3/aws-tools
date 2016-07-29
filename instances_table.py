@@ -13,6 +13,7 @@ def arguments_creation():
          description='Make things happen.')
     parser.add_argument('-p', '--profile', default="default", help='Profile to use', required=False)
     parser.add_argument('-o', '--output', default="weblike", help='Profile to use as output', choices=['weblike','securitygroup'], required=False)
+    parser.add_argument('-r', '--region', default=None, help='Region to override the default one')
     parser.add_argument('--stopped-vm', action='store_true', help="Show also stopped machine")
     args = parser.parse_args()
     return args
@@ -67,9 +68,9 @@ def get_name_from_tag(tag_list):
             return tag["Value"]
     return ""
 
-def main_like_web_interface(profile="default", filter_running=False):
+def main_like_web_interface(profile="default", filter_running=False, region=None):
     #js = json.loads(open("/tmp/prova.json", "r").read())
-    botosession=boto3.session.Session(profile_name=profile)
+    botosession=boto3.session.Session(profile_name=profile, region_name=region)
     ec2=botosession.resource('ec2')
 
     client=botosession.client('ec2')
@@ -88,9 +89,9 @@ def main_like_web_interface(profile="default", filter_running=False):
             get_value_from_key("PrivateIpAddress", instance) + "\t" + \
             get_value_from_key("KeyName", instance)
 
-def main_security_group(profile="default"):
+def main_security_group(profile="default", region=None):
         #js = json.loads(open("/tmp/prova.json", "r").read())
-    botosession=boto3.session.Session(profile_name=profile)
+    botosession=boto3.session.Session(profile_name=profile, region_name=region)
     ec2=botosession.resource('ec2')
 
     client=botosession.client('ec2')
@@ -107,6 +108,6 @@ if __name__ == '__main__':
     if arguments.output == "securitygroup":
         main_security_group(arguments.profile)
     elif arguments.output == "weblike":
-        main_like_web_interface(profile=arguments.profile, filter_running=arguments.stopped_vm)
+        main_like_web_interface(profile=arguments.profile, filter_running=arguments.stopped_vm, region=arguments.region)
 
 
