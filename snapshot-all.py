@@ -83,18 +83,38 @@ def get_id_name(profile="default", filter_running=False, region=None):
             id_name_map[get_name_from_tag(get_value_from_key("Tags", instance))] = (get_value_from_key("InstanceId", instance),get_root_volume_id(instance))
     return id_name_map
 
+def create_snapshot(id_name_map, profile="default", filter_running=False, region=None):
+    botosession=boto3.session.Session(profile_name=profile, region_name=region)
+    ec2=botosession.resource('ec2')
+
+    for instance in id_name_map:
+        instance_name = instance
+        instance_id = id_name_map[instance][0]
+        instance_root_volume = id_name_map[instance][1]
+        print instance_name, instance_id, instance_root_volume
+    #test
+    instance_name = 'Cerved-Antifrode-test'
+    instance_id = 'i-079077ba32a1c9584'
+    instance_root_volume = 'vol-0a469d84e1e878ab2'
+    response = ec2.create_snapshot(VolumeId=instance_root_volume, Description=instance_name+"20161021")
+    ec2.create_tags(
+                Resources=[response['SnapshotId']],
+                Tags=[{'Key': 'Name', 'Value': instance_name+"20161021"}])
+
 def arguments_creation():
     parser = argparse.ArgumentParser(
          description='Make things happen.')
     parser.add_argument('-p', '--profile', default="default", help='Profile to use', required=False)
     parser.add_argument('-r', '--region', default=None, help='Region to override the default one')
-    parser.add_argument('--stopped-vm', action='store_true', help="Show also stopped machine")
+    parser.add_argument('--stopped-vm', action='store_true', help="Snapshot stopped vm")
+    parser.add_argument('-c', '--create-ami', action='store_true', help="Create snapshot and AMI")
     args = parser.parse_args()
     return args
 
 if __name__ == '__main__':
     arguments = arguments_creation()
     pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(get_id_name(profile=arguments.profile, filter_running=arguments.stopped_vm, region=arguments.region))
-
+    #pp.pprint(get_id_name(profile=arguments.profile, filter_running=arguments.stopped_vm, region=arguments.region))
+    id_name_map = get_id_name(profile=arguments.profile, filter_running=arguments.stopped_vm, region=arguments.region)
+    create_snapshot(profile=arguments.profile, region=arguments.region, id_name_map=id_name_map)
 
